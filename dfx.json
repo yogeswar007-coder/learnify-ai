@@ -1,0 +1,31 @@
+{
+  "canisters": {
+    "internet_identity": {
+      "type": "custom",
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
+    },
+    "learnify_ai_backend": {
+      "main": "src/learnify_ai_backend/main.mo",
+      "type": "motoko"
+    },
+    "learnify_ai_frontend": {
+      "dependencies": [
+        "learnify_ai_backend"
+      ],
+      "source": [
+        "src/learnify_ai_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "learnify_ai_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
