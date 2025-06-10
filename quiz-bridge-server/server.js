@@ -19,33 +19,81 @@ app.use(express.json());
 const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 const PPLX_URL = "https://api.perplexity.ai/chat/completions";
 
+// Topic prompts with difficulty and question count support
 const TOPIC_PROMPTS = {
-  javascript: topic => `Generate 5 multiple choice questions about JavaScript programming. Each question should have 4 options, specify the correct answer (index 0-3), and provide a brief explanation.`,
-  python: topic => `Generate 5 multiple choice questions about Python programming. Each question should have 4 options, specify the correct answer (index 0-3), and provide a brief explanation.`,
-  blockchain: topic => `Generate 5 multiple choice questions about blockchain technology and cryptocurrency. Each question should have 4 options, specify the correct answer (index 0-3), and provide a brief explanation.`,
-  ai: topic => `Generate 5 multiple choice questions about artificial intelligence and machine learning. Each question should have 4 options, specify the correct answer (index 0-3), and provide a brief explanation.`,
-  webdev: topic => `Generate 5 multiple choice questions about web development. Each question should have 4 options, specify the correct answer (index 0-3), and provide a brief explanation.`,
-  icp: topic => `Generate 5 multiple choice questions about Internet Computer Protocol (ICP). Each question should have 4 options, specify the correct answer (index 0-3), and provide a brief explanation.`
+  javascript: (topic, difficulty, numQuestions) => `Generate ${numQuestions} multiple choice questions about JavaScript programming at ${difficulty} difficulty level. Each question should have 4 options, specify the correct answer (index 0-3), and provide a brief explanation.`,
+  python: (topic, difficulty, numQuestions) => `Generate ${numQuestions} multiple choice questions about Python programming at ${difficulty} difficulty level. Each question should have 4 options, specify the correct answer (index 0-3), and provide a brief explanation.`,
+  blockchain: (topic, difficulty, numQuestions) => `Generate ${numQuestions} multiple choice questions about blockchain technology and cryptocurrency at ${difficulty} difficulty level. Each question should have 4 options, specify the correct answer (index 0-3), and provide a brief explanation.`,
+  ai: (topic, difficulty, numQuestions) => `Generate ${numQuestions} multiple choice questions about artificial intelligence and machine learning at ${difficulty} difficulty level. Each question should have 4 options, specify the correct answer (index 0-3), and provide a brief explanation.`,
+  webdev: (topic, difficulty, numQuestions) => `Generate ${numQuestions} multiple choice questions about web development at ${difficulty} difficulty level. Each question should have 4 options, specify the correct answer (index 0-3), and provide a brief explanation.`,
+  icp: (topic, difficulty, numQuestions) => `Generate ${numQuestions} multiple choice questions about Internet Computer Protocol (ICP) at ${difficulty} difficulty level. Each question should have 4 options, specify the correct answer (index 0-3), and provide a brief explanation.`
 };
 
+// Store connected clients for real-time updates
+const connectedClients = new Set();
+
+// Function to shuffle array (Fisher-Yates shuffle)
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Function to randomize question options
+function randomizeQuestionOptions(question) {
+  const originalOptions = [...question.options];
+  const originalCorrectAnswer = question.correctAnswer;
+  
+  // Create array of indices and shuffle them
+  const indices = [0, 1, 2, 3];
+  const shuffledIndices = shuffleArray(indices);
+  
+  // Reorder options based on shuffled indices
+  const newOptions = shuffledIndices.map(index => originalOptions[index]);
+  
+  // Find where the original correct answer ended up
+  const newCorrectAnswer = shuffledIndices.indexOf(originalCorrectAnswer);
+  
+  return {
+    ...question,
+    options: newOptions,
+    correctAnswer: newCorrectAnswer
+  };
+}
+
+// Generate quiz with difficulty and question count
 app.post('/api/generate-quiz', async (req, res) => {
   try {
-    const { topic = "javascript", numQuestions = 5 } = req.body;
-    console.log('Received request for topic:', topic);
+    const { topic = "javascript", numQuestions = 5, difficulty = "medium" } = req.body;
+    console.log(`Received request for topic: ${topic}, questions: ${numQuestions}, difficulty: ${difficulty}`);
     
     // Check if API key exists
     if (!PERPLEXITY_API_KEY) {
       throw new Error('Perplexity API key not found in environment variables');
     }
     
-    const prompt = `${TOPIC_PROMPTS[topic] ? TOPIC_PROMPTS[topic](topic) : TOPIC_PROMPTS.javascript(topic)}
+    // Use updated prompt with difficulty and question count
+    const promptFunction = TOPIC_PROMPTS[topic] || TOPIC_PROMPTS.javascript;
+    const basePrompt = promptFunction(topic, difficulty, numQuestions);
+    
+    const prompt = `${basePrompt}
+
+Difficulty guidelines:
+- Easy: Basic concepts, straightforward questions, fundamental syntax
+- Medium: Intermediate concepts, some problem-solving, practical applications
+- Hard: Advanced concepts, complex scenarios, edge cases, optimization
+
+IMPORTANT: Randomize the correct answer position. Do NOT always put the correct answer as the first option. Mix up the correct answer positions across different questions.
 
 Format response as a valid JSON array:
 [
   {
     "question": "What is the correct way to declare a variable in JavaScript?",
-    "options": ["var x = 5", "variable x = 5", "declare x = 5", "x := 5"],
-    "correctAnswer": 0,
+    "options": ["variable x = 5", "var x = 5", "declare x = 5", "x := 5"],
+    "correctAnswer": 1,
     "explanation": "In JavaScript, 'var' is one of the ways to declare a variable."
   }
 ]
@@ -60,9 +108,9 @@ NO markdown, NO extra text, ONLY the JSON array.`;
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "sonar-pro", // ✅ FIXED: Using valid model name
+        model: "sonar-pro",
         messages: [{ role: "user", content: prompt }],
-        temperature: 0.5
+        temperature: difficulty === 'easy' ? 0.7 : difficulty === 'hard' ? 0.9 : 0.8 // Higher temperature for more randomness
       })
     });
 
@@ -75,7 +123,7 @@ NO markdown, NO extra text, ONLY the JSON array.`;
     }
 
     const data = await response.json();
-    console.log('Full Perplexity response:', JSON.stringify(data, null, 2));
+    console.log('Full Perplexity response received');
 
     // Check if the response has the expected structure
     if (!data.choices || !Array.isArray(data.choices) || data.choices.length === 0) {
@@ -89,14 +137,14 @@ NO markdown, NO extra text, ONLY the JSON array.`;
     }
 
     const quizText = data.choices[0].message.content;
-    console.log("Perplexity quiz text:", quizText);
+    console.log("Perplexity quiz text received");
 
     // Extract JSON from response
     let questions = [];
     try {
       // Remove markdown code fences if present
       let cleaned = quizText.trim();
-      cleaned = cleaned.replace(/(`{3,6})(\w*)/g, ''); // ✅ FIXED: Proper regex syntax
+      cleaned = cleaned.replace(/(`{3,6})(\w*)/g, '');
       
       const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
@@ -115,6 +163,14 @@ NO markdown, NO extra text, ONLY the JSON array.`;
           }
         }
         
+        // IMPORTANT: Randomize the options for each question
+        console.log('🔀 Randomizing question options to prevent pattern bias...');
+        questions = questions.map((question, index) => {
+          const randomizedQuestion = randomizeQuestionOptions(question);
+          console.log(`Question ${index + 1}: Correct answer moved from position ${question.correctAnswer} to position ${randomizedQuestion.correctAnswer}`);
+          return randomizedQuestion;
+        });
+        
       } else {
         throw new Error('No valid JSON array found in response');
       }
@@ -124,8 +180,17 @@ NO markdown, NO extra text, ONLY the JSON array.`;
       throw new Error(`Failed to parse quiz questions: ${err.message}`);
     }
 
-    console.log(`Successfully generated ${questions.length} questions`);
-    res.json({ success: true, questions });
+    console.log(`✅ Successfully generated ${questions.length} questions at ${difficulty} difficulty with randomized options`);
+    res.json({ 
+      success: true, 
+      questions,
+      metadata: {
+        topic,
+        difficulty,
+        questionCount: questions.length,
+        randomized: true
+      }
+    });
 
   } catch (error) {
     console.error('Quiz generation error:', error.message);
@@ -138,6 +203,7 @@ NO markdown, NO extra text, ONLY the JSON array.`;
   }
 });
 
+// Grade answer endpoint
 app.post('/api/grade-answer', async (req, res) => {
   try {
     const { topic, question, userAnswer, correctAnswer, explanation } = req.body;
@@ -164,7 +230,7 @@ app.post('/api/grade-answer', async (req, res) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "sonar-pro", // ✅ FIXED: Using valid model name (was sonar-medium-online)
+        model: "sonar-pro",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3
       })
@@ -215,17 +281,155 @@ app.post('/api/grade-answer', async (req, res) => {
   }
 });
 
+// AI Tutor endpoint
+app.post('/api/ai-tutor', async (req, res) => {
+  try {
+    const { messages } = req.body;
+    console.log('AI Tutor request received with', messages.length, 'messages');
+    
+    // Check if API key exists
+    if (!PERPLEXITY_API_KEY) {
+      console.log('API key not found for AI Tutor');
+      return res.status(500).json({ 
+        success: false, 
+        error: 'API key not configured'
+      });
+    }
+    
+    console.log('Making AI Tutor request to Perplexity API...');
+    
+    const response = await fetch(PPLX_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${PERPLEXITY_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "sonar-pro",
+        messages: messages,
+        max_tokens: 512,
+        temperature: 0.7
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Perplexity AI Tutor Error:', response.status, response.statusText);
+      console.error('Error details:', errorText);
+      throw new Error(`Perplexity API error: ${response.status} - ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('AI Tutor response received');
+
+    // Check response structure
+    if (!data.choices || !data.choices[0] || !data.choices[0].message || !data.choices[0].message.content) {
+      console.error('Unexpected AI Tutor response structure:', data);
+      throw new Error('Invalid response structure from Perplexity API');
+    }
+
+    const aiReply = data.choices[0].message.content.trim();
+    console.log('AI Tutor reply generated successfully');
+
+    res.json({ 
+      success: true, 
+      reply: aiReply
+    });
+
+  } catch (error) {
+    console.error('AI Tutor error:', error.message);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to get AI response',
+      details: error.message 
+    });
+  }
+});
+
+// Server-Sent Events endpoint for real-time dashboard updates
+app.get('/dashboard-updates', (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Cache-Control'
+  });
+
+  // Add client to connected clients
+  connectedClients.add(res);
+  console.log(`📡 New SSE client connected. Total clients: ${connectedClients.size}`);
+
+  // Send initial connection message
+  res.write(`data: ${JSON.stringify({
+    type: 'connection',
+    message: 'Connected to real-time updates',
+    timestamp: Date.now()
+  })}\n\n`);
+
+  // Send periodic heartbeat
+  const heartbeat = setInterval(() => {
+    if (res.destroyed) {
+      clearInterval(heartbeat);
+      connectedClients.delete(res);
+      return;
+    }
+    
+    res.write(`data: ${JSON.stringify({
+      type: 'heartbeat',
+      timestamp: Date.now()
+    })}\n\n`);
+  }, 30000);
+
+  // Handle client disconnect
+  req.on('close', () => {
+    clearInterval(heartbeat);
+    connectedClients.delete(res);
+    console.log(`📡 SSE client disconnected. Total clients: ${connectedClients.size}`);
+  });
+
+  req.on('error', (err) => {
+    console.error('SSE client error:', err);
+    clearInterval(heartbeat);
+    connectedClients.delete(res);
+  });
+});
+
+// Function to broadcast real-time updates to all connected clients
+function broadcastUpdate(updateData) {
+  const message = `data: ${JSON.stringify(updateData)}\n\n`;
+  
+  connectedClients.forEach(client => {
+    if (!client.destroyed) {
+      try {
+        client.write(message);
+      } catch (error) {
+        console.error('Error broadcasting to client:', error);
+        connectedClients.delete(client);
+      }
+    } else {
+      connectedClients.delete(client);
+    }
+  });
+  
+  console.log(`📡 Broadcasted update to ${connectedClients.size} clients:`, updateData.type);
+}
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    apiKeyConfigured: !!PERPLEXITY_API_KEY
+    apiKeyConfigured: !!PERPLEXITY_API_KEY,
+    connectedClients: connectedClients.size
   });
 });
 
 app.listen(PORT, () => {
   console.log(`🚀 Bridge server running on port ${PORT}`);
   console.log(`📊 Health check available at http://localhost:${PORT}/health`);
+  console.log(`📡 Real-time updates available at http://localhost:${PORT}/dashboard-updates`);
+  console.log(`🤖 AI Tutor available at http://localhost:${PORT}/api/ai-tutor`);
   console.log(`🔑 API Key configured: ${!!PERPLEXITY_API_KEY}`);
+  console.log(`🔀 Quiz randomization: ENABLED`);
 });
