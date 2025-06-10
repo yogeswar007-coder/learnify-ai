@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learnify AI - Your Intelligent Learning Companion</title>
+    <link rel="stylesheet" href="src/index.scss">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        // Initialize EmailJS immediately when script loads
+        (function(){
+            if (typeof emailjs !== 'undefined') {
+                emailjs.init({
+                    publicKey: "PmDcOAOwda5SSOtO9"
+                });
+                console.log('✅ EmailJS initialized successfully');
+            } else {
+                console.error('❌ EmailJS failed to load');
+            }
+        })();
+    </script>
+</head>
+
+<body>
+    <!-- Landing Page -->
+    <div id="main-page" class="page active">
+        <!-- Navigation Header -->
+        <nav class="main-nav">
+            <div class="nav-left">
+                <div class="logo">
+                    <span class="logo-text">Learnify AI</span>
+                </div>
+            </div>
+            <div class="nav-right">
+                <button class="nav-link" id="landingLoginBtn">Log in</button>
+                <button class="nav-link signup-nav" id="signupBtn">Sign up</button>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Learn smarter. Earn credentials. Unlock your potential.</h1>
+                <p class="hero-subtitle">
+                    AI-powered learning platform with gamified experiences and blockchain-verified achievements. 
+                    Transform your skills with personalized tutoring and earn NFT badges.
+                </p>
+                <div class="hero-buttons">
+                    <button class="btn-primary" id="startLearningBtn">Start learning</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- How to Use Section -->
+        <section class="how-to-use">
+            <div class="use-cases">
+                <div class="use-case-card">
+                    <div class="card-icon">🎯</div>
+                    <h3>Set your learning goals</h3>
+                    <p>Define what you want to learn and let our AI create a personalized curriculum for you.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="card-icon">🤖</div>
+                    <h3>Learn with AI tutoring</h3>
+                    <p>Get instant feedback, adaptive quizzes, and explanations tailored to your learning style.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="card-icon">🏆</div>
+                    <h3>Earn NFT credentials</h3>
+                    <p>Receive blockchain-verified badges and certificates that showcase your verified skills.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="card-icon">📊</div>
+                    <h3>Track your progress</h3>
+                    <p>Monitor your learning journey with detailed analytics and gamified achievements.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="card-icon">🌐</div>
+                    <h3>Join the community</h3>
+                    <p>Compete on leaderboards and collaborate with learners from around the world.</p>
+                </div>
+                <div class="use-case-card">
+                    <div class="card-icon">🎓</div>
+                    <h3>Get job-ready skills</h3>
+                    <p>Master in-demand skills with our industry-aligned courses and practical projects.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features">
+            <div class="features-content">
+                <h2>Why choose Learnify AI?</h2>
+                <div class="features-grid">
+                    <div class="feature">
+                        <h3>Autonomous AI Grading</h3>
+                        <p>Advanced AI evaluates your work instantly, providing detailed feedback and suggestions for improvement.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>Blockchain Credentials</h3>
+                        <p>Earn tamper-proof NFT badges and certificates that employers can verify on the blockchain.</p>
+                    </div>
+                    <div class="feature">
+                        <h3>Personalized Learning</h3>
+                        <p>Our AI adapts to your pace, style, and preferences to create the most effective learning experience.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Internet Identity Modal (hidden by default) -->
+    <div id="identityModal" class="identity-modal" style="display:none;">
+        <div class="identity-modal-content">
+            <h2>Sign in with Internet Identity</h2>
+            <p>Authenticate securely using your Internet Identity. No email or password required.</p>
+            <button class="btn-primary" id="internetIdentityLoginBtn">
+                <img src="assets/images/icp-logo.svg" alt="ICP" style="height:1.2em;vertical-align:middle;margin-right:8px;">
+                Login with Internet Identity
+            </button>
+            <button class="btn-secondary" id="closeIdentityModal" style="margin-top:1em;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Main App (hidden by default, shown after login) -->
+    <div id="main-app" class="main-app" style="display:none;">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <img src="assets/images/learnify-ai.png" alt="Learnify AI" class="logo-img">
+                    <div class="brand-content">
+                        <h1 class="app-title">Learnify AI</h1>
+                        <p class="brand-byline">Where AI Meets Blockchain—Powered by ICP</p>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <div class="user-menu">
+                        <span id="userDisplayName" class="user-name" style="display: none;">Welcome!</span>
+                        <button id="logoutBtn" class="logout-btn" style="display: none;">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <nav id="sidebar" class="sidebar">
+            <ul class="nav-menu">
+                <li><a href="#" data-page="dashboard" class="nav-link">
+                        <i class="fas fa-home"></i> Dashboard
+                    </a></li>
+                <li><a href="#" data-page="topics" class="nav-link active">
+                        <i class="fas fa-book"></i> Quizzes
+                    </a></li>
+                <li><a href="#" data-page="ai-tutor" class="nav-link">
+                        <i class="fas fa-robot"></i> AI Tutor
+                    </a></li>
+                <li><a href="#" data-page="badges" class="nav-link">
+                        <i class="fas fa-trophy"></i> Badges
+                    </a></li>
+                <li><a href="#" data-page="feedback" class="nav-link">
+                        <i class="fas fa-comment-alt"></i> Feedback
+                    </a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboardSection" class="page-content hidden">
+                <div class="dashboard-header">
+                    <h2>Welcome back! 👋</h2>
+                    <p>Ready to continue your learning journey?</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-content">
+                            <h3 id="totalQuizzes">0</h3>
+                            <p>Quizzes Completed</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-content">
+                            <h3 id="correctAnswers">0</h3>
+                            <p>Correct Answers</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📊</div>
+                        <div class="stat-content">
+                            <h3 id="accuracy">0%</h3>
+                            <p>Accuracy Rate</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-content">
+                            <h3 id="currentStreak">0</h3>
+                            <p>Study Streak</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-section">
+                        <h3>Topic Performance</h3>
+                        <div id="topicScores">
+                            <p class="no-data">Complete quizzes to see topic stats!</p>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-section">
+                        <h3>Quiz Attempts by Topic</h3>
+                        <div class="chart-container">
+                            <canvas id="topicAttemptsChart"></canvas>
+                            <div id="noQuizData" class="no-data" style="display: none;">
+                                Complete quizzes to see your topic distribution!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topic Selection Page -->
+            <div id="topicsSection" class="page-content">
+                <div class="page-header">
+                    <h2>Choose Your Learning Path</h2>
+                    <p>Select a topic to start your quiz journey</p>
+                </div>
+                <div class="courses-grid">
+                    <div class="course-card topic-card" data-topic="javascript">
+                        <div class="topic-image-container">
+                            <img src="assets/images/javascript-topic.jpg" 
+                                 alt="JavaScript" class="topic-image">
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">JavaScript</h3>
+                            <p class="course-description">Master the language of the web with interactive quizzes</p>
+                            <div class="course-meta">
+                                <span>5 quizzes</span>
+                                <span>Beginner to Advanced</span>
+                            </div>
+                            <button class="btn btn--primary btn--full-width">Start Learning</button>
+                        </div>
+                    </div>
+
+                    <div class="course-card topic-card" data-topic="python">
+                        <div class="topic-image-container">
+                            <img src="assets/images/python-topic.jpg" 
+                                 alt="Python" class="topic-image">
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Python</h3>
+                            <p class="course-description">Learn the most versatile programming language</p>
+                            <div class="course-meta">
+                                <span>4 quizzes</span>
+                                <span>Beginner to Advanced</span>
+                            </div>
+                            <button class="btn btn--primary btn--full-width">Start Learning</button>
+                        </div>
+                    </div>
+
+                    <div class="course-card topic-card" data-topic="blockchain">
+                        <div class="topic-image-container">
+                            <img src="assets/images/blockchain-topic.jpg" 
+                                 alt="Blockchain" class="topic-image">
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Blockchain</h3>
+                            <p class="course-description">Understand decentralized technologies and crypto</p>
+                            <div class="course-meta">
+                                <span>6 quizzes</span>
+                                <span>Intermediate to Advanced</span>
+                            </div>
+                            <button class="btn btn--primary btn--full-width">Start Learning</button>
+                        </div>
+                    </div>
+
+                    <div class="course-card topic-card" data-topic="ai">
+                        <div class="topic-image-container">
+                            <img src="assets/images/ai-ml-topic.jpg" 
+                                 alt="AI/ML" class="topic-image">
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">AI/ML</h3>
+                            <p class="course-description">Explore artificial intelligence and machine learning</p>
+                            <div class="course-meta">
+                                <span>3 quizzes</span>
+                                <span>Intermediate to Advanced</span>
+                            </div>
+                            <button class="btn btn--primary btn--full-width">Start Learning</button>
+                        </div>
+                    </div>
+
+                    <div class="course-card topic-card" data-topic="webdev">
+                        <div class="topic-image-container">
+                            <img src="assets/images/web-dev.jpg" 
+                                 alt="Web Development" class="topic-image">
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Web Development</h3>
+                            <p class="course-description">Build modern web applications from scratch</p>
+                            <div class="course-meta">
+                                <span>7 quizzes</span>
+                                <span>Beginner to Advanced</span>
+                            </div>
+                            <button class="btn btn--primary btn--full-width">Start Learning</button>
+                        </div>
+                    </div>
+
+                    <div class="course-card topic-card" data-topic="icp">
+                        <div class="topic-image-container">
+                            <img src="assets/images/internet-comp-topic.jpg" 
+                                 alt="Internet Computer" class="topic-image">
+                        </div>
+                        <div class="course-content">
+                            <h3 class="course-title">Internet Computer</h3>
+                            <p class="course-description">Master the Internet Computer Protocol</p>
+                            <div class="course-meta">
+                                <span>4 quizzes</span>
+                                <span>Intermediate to Advanced</span>
+                            </div>
+                            <button class="btn btn--primary btn--full-width">Start Learning</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Options Section -->
+            <div id="quizOptionsSection" class="page-content hidden">
+                <div class="quiz-options-container">
+                    <div class="quiz-options-header">
+                        <button id="backToTopicsBtn" class="btn btn--secondary">← Back to Topics</button>
+                        <h2>Customize Your Quiz</h2>
+                        <p>Selected Topic: <span id="selectedTopicDisplay" class="topic-highlight">JavaScript</span></p>
+                    </div>
+
+                    <div class="quiz-customization">
+                        <div class="customization-section">
+                            <h3>🎯 Difficulty Level</h3>
+                            <div class="difficulty-options">
+                                <button class="difficulty-btn" data-difficulty="easy">
+                                    <span class="difficulty-icon">🟢</span>
+                                    <span class="difficulty-label">Easy</span>
+                                    <span class="difficulty-desc">Basic concepts</span>
+                                </button>
+                                <button class="difficulty-btn active" data-difficulty="medium">
+                                    <span class="difficulty-icon">🟡</span>
+                                    <span class="difficulty-label">Medium</span>
+                                    <span class="difficulty-desc">Intermediate level</span>
+                                </button>
+                                <button class="difficulty-btn" data-difficulty="hard">
+                                    <span class="difficulty-icon">🔴</span>
+                                    <span class="difficulty-label">Hard</span>
+                                    <span class="difficulty-desc">Advanced concepts</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="customization-section">
+                            <h3>📊 Number of Questions</h3>
+                            <div class="quantity-control">
+                                <button class="quantity-btn" data-action="decrease">-</button>
+                                <input type="number" id="questionCount" value="10" min="5" max="20" readonly>
+                                <button class="quantity-btn" data-action="increase">+</button>
+                            </div>
+                            <p class="quantity-info">Choose between 5-20 questions</p>
+                        </div>
+
+                        <div class="quiz-start-section">
+                            <button id="startCustomQuizBtn" class="btn btn--primary btn--large">
+                                🚀 Start Quiz
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div id="quizSection" class="page-content hidden">
+                <div class="quiz-container">
+                    <div class="quiz-header">
+                        <button id="backToTopics" class="btn btn--secondary">← Back to Topics</button>
+                        <div class="quiz-progress">
+                            <div class="progress-bar">
+                                <div id="quiz-progress-bar" class="progress-fill"></div>
+                            </div>
+                            <span id="questionCounter">Question 1 of 5</span>
+                        </div>
+                    </div>
+                    <div id="quizContent" class="quiz-content">
+                        <div class="loading">Generating your quiz...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="page-content hidden">
+                <div class="quiz-results">
+                    <div class="results-header">
+                        <h2>🎉 Quiz Complete!</h2>
+                        <div class="topic-info">
+                            <span id="topicBadge" class="topic-badge">JAVASCRIPT</span>
+                            <span id="difficultyBadge" class="difficulty-badge">MEDIUM</span>
+                        </div>
+                    </div>
+
+                    <div class="score-container">
+                        <div class="score-circle">
+                            <span id="finalScore" class="score-number">85%</span>
+                        </div>
+                        <div class="results-details">
+                            <h3>Your Performance</h3>
+                            <p id="scoreText" class="score-text">You got 8 out of 10 questions correct</p>
+                            <p id="performanceMessage" class="performance-message">Great job! You have a solid understanding!</p>
+                        </div>
+                    </div>
+
+                    <div class="quiz-actions">
+                        <button id="tryAgainBtn" class="btn btn--primary">🔄 Try Again</button>
+                        <button id="newTopicBtn" class="btn btn--secondary">🏠 Choose New Topic</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Tutor Section -->
+            <div id="ai-tutorSection" class="page-content hidden">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="ai-avatar">
+                            <img src="assets/images/ai-tutor.jpg"
+                                alt="AI Tutor" class="topic-image">
+                        </div>
+                        <div class="ai-info">
+                            <h3>AI Tutor Assistant</h3>
+                            <p class="status">Online • Ready to help</p>
+                        </div>
+                    </div>
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="message assistant">
+                            Hello! I'm your AI tutor. How can I help you learn today?
+                        </div>
+                    </div>
+                    <div class="chat-input-container">
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" placeholder="Ask your AI tutor anything..."
+                                class="form-control">
+                            <button id="send-message" class="btn btn--primary">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Badges Section -->
+            <div id="badgesSection" class="page-content hidden">
+                <div class="page-header">
+                    <h2>Your Achievements</h2>
+                    <p>Unlock badges as you progress through your learning journey</p>
+                </div>
+                <div id="badgesContainer" class="achievements-grid">
+                    <!-- First Quiz Badge -->
+                    <div class="achievement-card locked">
+                        <span class="achievement-icon">🎯</span>
+                        <h3>First Quiz</h3>
+                        <p>Complete your first quiz</p>
+                        <span class="status status--info">Coming Soon</span>
+                    </div>
+                    
+                    <!-- Perfect Score Badge -->
+                    <div class="achievement-card locked">
+                        <span class="achievement-icon">🏆</span>
+                        <h3>Perfect Score</h3>
+                        <p>Get 100% on any quiz</p>
+                        <span class="status status--info">Coming Soon</span>
+                    </div>
+                    
+                    <!-- Study Streak Badge -->
+                    <div class="achievement-card locked">
+                        <span class="achievement-icon">🔥</span>
+                        <h3>Study Streak</h3>
+                        <p>Complete quizzes 5 days in a row</p>
+                        <span class="status status--info">Coming Soon</span>
+                    </div>
+                    
+                    <!-- Quick Learner Badge -->
+                    <div class="achievement-card locked">
+                        <span class="achievement-icon">⚡</span>
+                        <h3>Quick Learner</h3>
+                        <p>Complete a quiz in under 2 minutes</p>
+                        <span class="status status--info">Coming Soon</span>
+                    </div>
+                    
+                    <!-- JavaScript Master Badge -->
+                    <div class="achievement-card locked">
+                        <span class="achievement-icon">💻</span>
+                        <h3>JavaScript Master</h3>
+                        <p>Score 90% or higher on 3 JavaScript quizzes</p>
+                        <span class="status status--info">Coming Soon</span>
+                    </div>
+                    
+                    <!-- Knowledge Seeker Badge -->
+                    <div class="achievement-card locked">
+                        <span class="achievement-icon">📚</span>
+                        <h3>Knowledge Seeker</h3>
+                        <p>Complete quizzes in 5 different topics</p>
+                        <span class="status status--info">Coming Soon</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FIXED Feedback Section with Proper EmailJS Integration -->
+            <div id="feedbackSection" class="page-content hidden">
+                <div class="feedback-container">
+                    <div class="feedback-header">
+                        <h2>Help Improve Learnify AI</h2>
+                        <p>Your feedback helps us enhance your learning experience</p>
+                    </div>
+
+                    <form id="feedbackForm" class="feedback-form">
+                        <!-- Rating Section -->
+                        <div class="feedback-group">
+                            <label>How would you rate your experience?</label>
+                            <div class="rating-stars">
+                                <div class="star" data-value="1" tabindex="0" role="button" aria-label="1 star">★</div>
+                                <div class="star" data-value="2" tabindex="0" role="button" aria-label="2 stars">★</div>
+                                <div class="star" data-value="3" tabindex="0" role="button" aria-label="3 stars">★</div>
+                                <div class="star" data-value="4" tabindex="0" role="button" aria-label="4 stars">★</div>
+                                <div class="star" data-value="5" tabindex="0" role="button" aria-label="5 stars">★</div>
+                            </div>
+                            <input type="hidden" id="ratingValue" name="rating" required>
+                        </div>
+
+                        <!-- User Email - MATCHES YOUR TEMPLATE -->
+                        <div class="feedback-group">
+                            <label for="user_email">Your Email (Optional)</label>
+                            <input type="email" 
+                                   id="user_email" 
+                                   name="user_email" 
+                                   placeholder="your.email@example.com" 
+                                   class="form-control"
+                                   autocomplete="email">
+                        </div>
+
+                        <!-- Message/Comments - MATCHES YOUR TEMPLATE -->
+                        <div class="feedback-group">
+                            <label for="message">What can we improve?</label>
+                            <textarea id="message"
+                                      name="message" 
+                                      placeholder="Example: More interactive quizzes, better explanations, new topics..."
+                                      class="form-control" 
+                                      rows="4" 
+                                      required></textarea>
+                        </div>
+
+                        <!-- Feature Request - MATCHES YOUR TEMPLATE -->
+                        <div class="feedback-group">
+                            <label for="feature_request">What feature would you like to see next?</label>
+                            <input type="text" 
+                                   id="feature_request"
+                                   name="feature_request"
+                                   placeholder="Example: Mobile app, offline mode, study reminders..." 
+                                   class="form-control" 
+                                   required>
+                        </div>
+
+                        <button type="submit" class="btn btn--primary btn-glow">
+                            <span class="btn-text">Submit Feedback</span>
+                            <div class="loading-dots hidden">...</div>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Enhanced Feedback Success Notification -->
+    <div id="feedbackSuccess" class="feedback-success hidden">
+        <div class="success-message">
+            <span class="success-slider"></span>
+            <div class="message-content">
+                <h3>🎉 Thanks for your feedback!</h3>
+                <p>We'll use this to improve your learning experience.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Success Popup -->
+    <div id="loginSuccess" class="login-success hidden">
+        <div class="feedback-success">
+            <span class="success-slider"></span>
+            <div class="message-content">
+                <h3>🎉 Welcome back!</h3>
+                <p id="loginWelcomeMessage">Great to see you again!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- First Time User Name Input Modal -->
+    <div id="nameInputModal" class="name-modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>👋 Welcome to Learnify AI!</h3>
+                <p>What would you like us to call you?</p>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="userNameInput" placeholder="Enter your name..." maxlength="20">
+                <button id="saveUserName" class="btn btn--primary">Save Name</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <script type="module" src="src/main.js"></script>
+</body>
+
+</html>
