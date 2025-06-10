@@ -20,6 +20,7 @@
     "@dfinity/auth-client": "^2.4.1",
     "@dfinity/candid": "^2.4.1",
     "@dfinity/principal": "^2.4.1",
+    "@emailjs/browser": "^4.4.1",
     "@supabase/supabase-js": "^2.49.10"
   }
 }
