@@ -7,6 +7,8 @@
 [![Motoko](https://img.shields.io/badge/Backend-Motoko-orange)](https://github.com/dfinity/motoko)
 [![JavaScript](https://img.shields.io/badge/Frontend-JavaScript-yellow)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 
+**USE FIREFOX TO AVAIL MAXIMUM FUNCTIONALITY**
+
 ---
 
 ## 📖 Overview
