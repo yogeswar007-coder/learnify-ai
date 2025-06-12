@@ -1,0 +1,26 @@
+// Version: 1.0.0
+type Badge__505143144 =
+  {
+    criteria : Text;
+    description : Text;
+    earnedAt : Int;
+    id : Text;
+    imageUrl : Text;
+    name : Text;
+    rarity : Text
+  };
+type UserProfile__514670757 =
+  {
+    badges : [Badge__505143144];
+    correctAnswers : Nat;
+    lastActive : Int;
+    level : Nat;
+    principal : Principal;
+    streak : Nat;
+    topicScores : [(Text, Nat)];
+    totalPoints : Nat;
+    totalQuizzes : Nat
+  };
+actor {
+  stable var userProfilesEntries : [(Principal, UserProfile__514670757)]
+};
